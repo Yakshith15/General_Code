@@ -161,3 +161,89 @@ while len(nodes) > 1:
 
 	heapq.heappush(nodes, newNode) 
 printNodes(nodes[0]) 
+
+
+
+
+
+
+class Solution:
+    def solve(self, col, board, ans, leftrow, upperDiagonal, lowerDiagonal, n):
+        if col == n:
+            ans.append(board[:])
+            return
+
+
+        for row in range(n):
+            if leftrow[row] == 0 and lowerDiagonal[row+col] == 0 and upperDiagonal[n-1+col-row] == 0:
+                board[row] = board[row][:col] + 'Q' + board[row][col+1:]
+                leftrow[row] = 1
+                lowerDiagonal[row+col] = 1
+                upperDiagonal[n-1+col-row] = 1
+                self.solve(col+1, board, ans, leftrow,
+                           upperDiagonal, lowerDiagonal, n)
+                board[row] = board[row][:col] + '.' + board[row][col+1:]
+                leftrow[row] = 0
+                lowerDiagonal[row+col] = 0
+                upperDiagonal[n-1+col-row] = 0
+
+
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        ans = []
+        board = ['.'*n for _ in range(n)]
+        leftrow = [0]*n
+        upperDiagonal = [0]*(2*n-1)
+        lowerDiagonal = [0]*(2*n-1)
+        self.solve(0, board, ans, leftrow, upperDiagonal, lowerDiagonal, n)
+        return ans
+
+
+
+
+if __name__ == '__main__':
+    n = 4
+    obj = Solution()
+    ans = obj.solveNQueens(n)
+    for i in range(len(ans)):
+        print("Arrangement", i+1)
+        for j in range(len(ans[0])):
+            print(ans[i][j])
+            print()
+
+
+
+def lcsUtil(s1, s2, ind1, ind2, dp):
+    # Base case: If either of the strings has reached the end
+    if ind1 < 0 or ind2 < 0:
+        return 0
+    
+    # If the result for this state is already calculated, return it
+    if dp[ind1][ind2] != -1:
+        return dp[ind1][ind2]
+    
+    # If the characters at the current indices match, include them in the LCS
+    if s1[ind1] == s2[ind2]:
+        dp[ind1][ind2] = 1 + lcsUtil(s1, s2, ind1 - 1, ind2 - 1, dp)
+    else:
+        # If the characters do not match, consider both possibilities:
+        # 1. Exclude character from s1 and continue matching in s2
+        # 2. Exclude character from s2 and continue matching in s1
+        dp[ind1][ind2] = max(lcsUtil(s1, s2, ind1, ind2 - 1, dp), lcsUtil(s1, s2, ind1 - 1, ind2, dp))
+    
+    return dp[ind1][ind2]
+
+def lcs(s1, s2):
+    n = len(s1)
+    m = len(s2)
+    dp = [[-1 for j in range(m)] for i in range(n)]
+    return lcsUtil(s1, s2, n - 1, m - 1, dp)
+
+def main():
+    s1 = "acd"
+    s2 = "ced"
+    print("The Length of Longest Common Subsequence is", lcs(s1, s2))
+
+if __name__ == '__main__':
+    main()
+
+
