@@ -1,0 +1,1509 @@
+demonstrate Shortest Job First or Shortest Job next CPU scheduling
+
+#include <stdio.h>
+int main()
+{
+      int arrival_time[10], burst_time[10], temp[10];
+      int i, smallest, count = 0, time, limit;
+      double wait_time = 0, turnaround_time = 0, end;
+      float average_waiting_time, average_turnaround_time;
+      printf("\nEnter the Total Number of Processes:\t");
+      scanf("%d", &limit);
+      printf("\nEnter Details of %d Processes\n", limit);
+      for(i = 0; i < limit; i++)
+      {
+            printf("\nEnter Arrival Time:\t");
+            scanf("%d", &arrival_time[i]);
+            printf("Enter Burst Time:\t");
+            scanf("%d", &burst_time[i]);
+            temp[i] = burst_time[i];
+      }
+      burst_time[9] = 9999;  
+      for(time = 0; count != limit; time++)
+      {
+            smallest = 9;
+            for(i = 0; i < limit; i++)
+            {
+                  if(arrival_time[i] <= time && burst_time[i] < burst_time[smallest] && burst_time[i] > 0)
+                  {
+                        smallest = i;
+                  }
+            }
+            burst_time[smallest]--;
+            if(burst_time[smallest] == 0)
+            {
+                  count++;
+                  end = time + 1;
+                  wait_time = wait_time + end - arrival_time[smallest] - temp[smallest];
+                  turnaround_time = turnaround_time + end - arrival_time[smallest];
+            }
+      }
+      average_waiting_time = wait_time / limit;
+      average_turnaround_time = turnaround_time / limit;
+      printf("\n\nAverage Waiting Time:\t%lf\n", average_waiting_time);
+      printf("Average Turnaround Time:%lf\n", average_turnaround_time);
+      return 0;
+}
+
+------------------------
+Program(non preemptive):
+#include<stdio.h>
+ int main()
+{
+    int bt[20],p[20],wt[20],tat[20],i,j,n,total=0,pos,temp;
+    float avg_wt,avg_tat;
+    printf("Enter number of processes:");
+    scanf("%d",&n);
+  
+    printf("\nEnter Burst Time:n");
+    for(i=0;i<n;i++)
+    {
+        printf("p%d:",i+1);
+        scanf("%d",&bt[i]);
+        p[i]=i+1;         
+    }
+  
+   //sorting of burst times
+    for(i=0;i<n;i++)
+    {
+        pos=i;
+        for(j=i+1;j<n;j++)
+        {
+            if(bt[j]<bt[pos])
+                pos=j;
+        }
+  
+        temp=bt[i];
+        bt[i]=bt[pos];
+        bt[pos]=temp;
+  
+        temp=p[i];
+        p[i]=p[pos];
+        p[pos]=temp;
+    }
+   
+    wt[0]=0;            
+  
+   
+    for(i=1;i<n;i++)
+    {
+        wt[i]=0;
+        for(j=0;j<i;j++)
+            wt[i]+=bt[j];
+  
+        total+=wt[i];
+    }
+  
+    avg_wt=(float)total/n;      
+    total=0;
+  
+    printf("\nProcess\t    Burst Time    \tWaiting Time\tTurnaround Time");
+    for(i=0;i<n;i++)
+    {
+        tat[i]=bt[i]+wt[i];   
+        total+=tat[i];
+        printf("\np%d\t\t  %d\t\t    %d\t\t\t%d",p[i],bt[i],wt[i],tat[i]);
+    }
+  
+    avg_tat=(float)total/n;    
+    printf("\n\nAverage Waiting Time=%f",avg_wt);
+    printf("\nAverage Turnaround Time=%f\n",avg_tat);
+}
+
+
+-
+-------------------------------------------------------------------------------
+demonstrate Round Robin CPU scheduling
+
+#include<stdio.h>
+int main()
+{
+      int i, limit, total = 0, x, counter = 0, time_quantum;
+      int wait_time = 0, turnaround_time = 0, arrival_time[10], burst_time[10], temp[10];
+      float average_wait_time, average_turnaround_time;
+      printf("\nEnter Total Number of Processes:\t");
+      scanf("%d", &limit);
+      x = limit;
+      for(i = 0; i < limit; i++)
+      {
+            printf("\nEnter Details of Process[%d]\n", i + 1);
+ 
+            printf("Arrival Time:\t");
+ 
+            scanf("%d", &arrival_time[i]);
+ 
+            printf("Burst Time:\t");
+ 
+            scanf("%d", &burst_time[i]);
+ 
+            temp[i] = burst_time[i];
+      }
+ 
+      printf("\nEnter Time Quantum:\t");
+      scanf("%d", &time_quantum);
+      printf("\nProcess ID\t\tBurst Time\t Turnaround Time\t Waiting Time\n");
+      for(total = 0, i = 0; x != 0;)
+      {
+            if(temp[i] <= time_quantum && temp[i] > 0)
+            {
+                  total = total + temp[i];
+                  temp[i] = 0;
+                  counter = 1;
+            }
+            else if(temp[i] > 0)
+            {
+                  temp[i] = temp[i] - time_quantum;
+                  total = total + time_quantum;
+            }
+            if(temp[i] == 0 && counter == 1)
+            {
+                  x--;
+                  printf("\nProcess[%d]\t\t%d\t\t %d\t\t\t %d", i + 1, burst_time[i], total - arrival_time[i], total - arrival_time[i] - burst_time[i]);
+                  wait_time = wait_time + total - arrival_time[i] - burst_time[i];
+                  turnaround_time = turnaround_time + total - arrival_time[i];
+                  counter = 0;
+            }
+            if(i == limit - 1)
+            {
+                  i = 0;
+            }
+            else if(arrival_time[i + 1] <= total)
+            {
+                  i++;
+            }
+            else
+            {
+                  i = 0;
+            }
+      }
+ 
+      average_wait_time = wait_time * 1.0 / limit;
+      average_turnaround_time = turnaround_time * 1.0 / limit;
+      printf("\n\nAverage Waiting Time:\t%f", average_wait_time);
+      printf("\nAvg Turnaround Time:\t%f\n", average_turnaround_time);
+      return 0;
+}
+------------------------------------------------------------------------------------------
+
+
+to demonstrate  Priority CPU  Scheduling
+
+Program(preemptive):
+#include<stdio.h>
+struct process
+{
+    int WT,AT,BT,TAT,PT;
+};
+
+struct process a[10];
+
+int main()
+{
+    int n,temp[10],t,count=0,short_p;
+    float total_WT=0,total_TAT=0,Avg_WT,Avg_TAT;
+    printf("Enter the number of the process\n");
+    scanf("%d",&n);
+    printf("Enter the arrival time , burst time and priority of the process\n");
+    printf("AT BT PT\n");
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d%d%d",&a[i].AT,&a[i].BT,&a[i].PT);
+        
+        // copying the burst time in
+        // a temp array fot futher use
+        temp[i]=a[i].BT;
+    }
+    
+    // we initialize the burst time
+    // of a process with maximum
+    a[9].PT=10000;
+    
+    for(t=0;count!=n;t++)
+    {
+        short_p=9;
+        for(int i=0;i<n;i++)
+        {
+            if(a[short_p].PT>a[i].PT && a[i].AT<=t && a[i].BT>0)
+            {
+                short_p=i;
+            }
+        }
+        
+        a[short_p].BT=a[short_p].BT-1;
+        
+        // if any process is completed
+        if(a[short_p].BT==0)
+        {
+            // one process is completed
+            // so count increases by 1
+            count++;
+            a[short_p].WT=t+1-a[short_p].AT-temp[short_p];
+            a[short_p].TAT=t+1-a[short_p].AT;
+            
+            // total calculation
+            total_WT=total_WT+a[short_p].WT;
+            total_TAT=total_TAT+a[short_p].TAT;
+            
+        }
+    }
+    
+    Avg_WT=total_WT/n;
+    Avg_TAT=total_TAT/n;
+    
+    // printing of the answer
+    printf("ID WT TAT\n");
+    for(int i=0;i<n;i++)
+    {
+        printf("%d %d\t%d\n",i+1,a[i].WT,a[i].TAT);
+    }
+    
+    printf("Avg waiting time of the process  is %f\n",Avg_WT);
+    printf("Avg turn around time of the process is %f\n",Avg_TAT);
+    
+    return 0;
+}
+
+------------
+Program(Non preemptive):
+#include<stdio.h>
+struct process
+{
+    int id,WT,AT,BT,TAT,PR;
+};
+struct process a[10];
+
+// function for swapping
+void swap(int *b,int *c)
+{
+    int tem;
+    tem=*c;
+    *c=*b;
+    *b=tem;
+}
+
+//Driver function
+int main()
+{
+    int n,check_ar=0;
+    int Cmp_time=0;
+    float Total_WT=0,Total_TAT=0,Avg_WT,Avg_TAT;
+    printf("Enter the number of process \n");
+    scanf("%d",&n);
+    printf("Enter the Arrival time , Burst time and priority of the process\n");
+    printf("AT BT PR\n");
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d%d%d",&a[i].AT,&a[i].BT,&a[i].PR);
+        a[i].id=i+1;
+        // here we are checking that arrival time
+        // of the process are same or different
+        if(i==0)
+         check_ar=a[i].AT;
+         
+        if(check_ar!=a[i].AT )
+         check_ar=1;
+        
+    }
+    // if process are arrived at the different time
+    // then sort the process on the basis of AT
+    if(check_ar!=0)
+    {
+        for(int i=0;i<n;i++)
+        {
+            for(int j=0;j<n-i-1;j++)
+            {
+                if(a[j].AT>a[j+1].AT)
+                {
+                      swap(&a[j].id,&a[j+1].id);
+                      swap(&a[j].AT,&a[j+1].AT);
+                      swap(&a[j].BT,&a[j+1].BT);
+                      swap(&a[j].PR,&a[j+1].PR);
+                }}}
+    
+    // logic of Priority scheduling ( non preemptive) algo
+    // if all the process are arrived at different time
+    if(check_ar!=0)
+    {
+        a[0].WT=a[0].AT;
+        a[0].TAT=a[0].BT-a[0].AT;
+        // cmp_time for completion time
+        Cmp_time=a[0].TAT;
+        Total_WT=Total_WT+a[0].WT;
+        Total_TAT=Total_TAT+a[0].TAT;
+        for(int i=1;i<n;i++)
+        {
+            int min=a[i].PR;
+            for(int j=i+1;j<n;j++)
+            {
+                if(min>a[j].PR && a[j].AT<=Cmp_time)
+                {
+                      min=a[j].PR;
+                      swap(&a[i].id,&a[j].id);
+                      swap(&a[i].AT,&a[j].AT);
+                      swap(&a[i].BT,&a[j].BT);
+                      swap(&a[i].PR,&a[j].PR);
+                      
+                }
+                
+            }
+            a[i].WT=Cmp_time-a[i].AT;
+            Total_WT=Total_WT+a[i].WT;
+            // completion time of the process
+            Cmp_time=Cmp_time+a[i].BT;
+            
+            // Turn Around Time of the process
+            // compl-Arival
+            a[i].TAT=Cmp_time-a[i].AT;
+            Total_TAT=Total_TAT+a[i].TAT;
+            
+        }
+    }
+    
+    // if all the process are arrived at same time
+    else
+    {
+        for(int i=0;i<n;i++)
+        {
+            int min=a[i].PR;
+            for(int j=i+1;j<n;j++)
+            {
+                if(min>a[j].PR && a[j].AT<=Cmp_time)
+                {
+                    min=a[j].PR;
+                      swap(&a[i].id,&a[j].id);
+                      swap(&a[i].AT,&a[j].AT);
+                      swap(&a[i].BT,&a[j].BT);
+                       swap(&a[i].PR,&a[j].PR);
+                }
+                
+            }
+            a[i].WT=Cmp_time-a[i].AT;
+            
+             // completion time of the process
+            Cmp_time=Cmp_time+a[i].BT;
+            
+            // Turn Around Time of the process
+            // compl-Arrival
+            a[i].TAT=Cmp_time-a[i].AT;
+            Total_WT=Total_WT+a[i].WT;
+            Total_TAT=Total_TAT+a[i].TAT;
+            
+        }
+        
+    }
+    
+    Avg_WT=Total_WT/n;
+    Avg_TAT=Total_TAT/n;
+
+    // Printing of the results
+    printf("The process are\n");
+    printf("ID WT TAT\n");
+    for(int i=0;i<n;i++)
+    {
+        printf("%d\t%d\t%d\n",a[i].id,a[i].WT,a[i].TAT);
+    }
+    
+    printf("Avg waiting time is: %f\n",Avg_WT);
+    printf("Avg turn around time is: %f",Avg_TAT);
+    return 0;
+
+}
+
+
+
+-----------------------------------------------------------------------------------------
+-------demonstrate the use of atexit() exit handler
+
+#include <stdio.h>
+#include <stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+
+//File Discriptors
+int fd1;
+int fd2;
+
+void functionA () {  // Exit Handler 
+   close(fd1); 
+   printf("We are in  functionA and closed the file \n");
+}
+
+void functionB () {  // Exit Handler 
+   close(fd2); 
+   printf("We are in  functionB and closed the file \n");
+}
+
+int main () {
+   /* register the termination function */
+   char buf[10];
+   fd1=open("kk.txt",O_RDONLY,742); // kk.txt should present in current folder 
+   fd2=open("kk1.txt",O_RDONLY,S_IRWXU|S_IRGRP|S_IXOTH);
+   
+   read(fd1,buf,10);
+   write(1,buf,10);
+   printf("\nCompleted the operation A \n");
+   atexit(functionA );
+   
+   read(fd2,buf,10);
+   write(1,buf,10);
+   printf("\nCompleted the operation B \n");
+   atexit(functionB );
+   
+   printf("Starting  main Program...\n");
+
+   printf("Exiting main Program...\n");
+
+   return(0);
+}
+
+
+
+---------------------------------------------------------------------------
+demonstrate the use of exit() and _exit() system call
+
+i)use of exit():
+#include<stdio.h>
+#include<stdlib.h>
+
+void func(){
+    printf("Exiting\n");
+}
+int main(){
+    atexit(func);
+    exit(10);
+}
+
+ii)use of _exit():
+#include<stdio.h>
+#include<stdlib.h>
+
+void func(){
+    printf("Exiting\n");
+}
+int main(){
+    printf("Start of the Program\n");
+    atexit(func);
+    _Exit(10);
+    printf("End of the Program\n");
+}
+
+
+----------------------------------------------------------------------------
+demonstrate the use of wait() , waitpid() and waitid()
+
+Wait() function:
+#define _POSIX_SOURCE
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdio.h>
+#include<stdlib.h>
+#include <time.h>
+int main() {
+  pid_t pid;
+  time_t t;
+  int status;
+  if ((pid = fork()) < 0)
+    perror("fork() error");
+  else if (pid == 0) {
+    time(&t);
+    printf("child (pid %d) started at %s", (int) getpid(), ctime(&t));
+    sleep(5);
+    time(&t);
+    printf("child exiting at %s", ctime(&t));
+    exit(42);
+  }
+  else {
+    printf("parent has forked child with pid of %d\n", (int) pid);
+    time(&t);
+    printf("parent is starting wait at %s", ctime(&t));
+    if ((pid = wait(&status)) == -1)
+      perror("wait() error");
+    else {
+      time(&t);
+      printf("parent is done waiting at %s", ctime(&t));
+      printf("the pid of the process that ended was %d\n", (int) pid);
+      if (WIFEXITED(status))
+        printf("child exited with status of %d\n", WEXITSTATUS(status));
+      else if (WIFSIGNALED(status))
+        printf("child was terminated by signal %d\n",
+               WTERMSIG(status));
+      else if (WIFSTOPPED(status))
+        printf("child was stopped by signal %d\n", WSTOPSIG(status));
+      else puts("reason unknown for child termination");
+    }
+  }
+}
+
+
+-------------------------------------------------------------------------
+Waitpid() function:
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int
+main(int argc, char *argv[])
+{
+    pid_t cpid, w;
+    int status;
+
+   cpid = fork();
+    if (cpid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+
+   if (cpid == 0) {            /* Code executed by child */
+        printf("Child PID is %ld\n", (long) getpid());
+        if (argc == 1)
+            pause();                    /* Wait for signals */
+        _exit(atoi(argv[1]));
+
+   } else {                    /* Code executed by parent */
+        do {
+            w = waitpid(cpid, &status, WUNTRACED | WCONTINUED);
+            if (w == -1) {
+                perror("waitpid");
+                exit(EXIT_FAILURE);
+            }
+
+           if (WIFEXITED(status)) {
+                printf("exited, status=%d\n", WEXITSTATUS(status));
+            } else if (WIFSIGNALED(status)) {
+                printf("killed by signal %d\n", WTERMSIG(status));
+            } else if (WIFSTOPPED(status)) {
+                printf("stopped by signal %d\n", WSTOPSIG(status));
+            } else if (WIFCONTINUED(status)) {
+                printf("continued\n");
+            }
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        exit(EXIT_SUCCESS);
+    }
+}
+
+-------------------------------------------------------------------
+Waitid() function:
+#define pr_exit(n) printf("%d\n", n)
+#define err_sys perror
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/wait.h>
+int main(void)
+{
+    pid_t   pid;
+    int     status;
+    siginfo_t info;
+    if ((pid = fork()) < 0)
+        err_sys("fork error");
+    else if (pid == 0)              /* child */
+        exit(7);
+    if (waitid(P_PID,pid,&info,WEXITED) != pid)       /* wait for child */
+        err_sys("wait error");
+    pr_exit(status);                /* and print its status */
+    if ((pid = fork()) < 0)
+        err_sys("fork error");
+    else if (pid == 0)              /* child */
+        abort();                    /* generates SIGABRT */
+    if (waitid(P_PID,pid,&info,WEXITED) != pid)       /* wait for child */
+        err_sys("wait error");
+    pr_exit(status);                /* and print its status */
+    if ((pid = fork()) < 0)
+        err_sys("fork error");
+    else if (pid == 0)              /* child */
+        status = 0;                /* divide by 0 generates SIGFPE */
+    if (waitid(P_PID,pid,&info,WEXITED) != pid)       /* wait for child */
+        err_sys("wait error");
+    pr_exit(status);                
+    exit(0);
+}
+
+
+---------------------------------------------------------------------
+demonstrate the use of wait3() and wait4()
+
+Wait3() function:
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+int
+main(int argc, char *argv[])
+{
+    pid_t cpid, w;
+    int status;
+    struct rusage Use;
+   cpid = fork();
+    if (cpid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+   if (cpid == 0) {            /* Code executed by child */
+        printf("Child PID is %ld\n", (long) getpid());
+        if (argc == 1)
+            pause();                    /* Wait for signals */
+        _exit(atoi(argv[1]));
+   } else {                    /* Code executed by parent */
+        do {
+            w = wait3(&status, WUNTRACED | WCONTINUED, &Use);
+            if (w == -1) {
+                perror("waitpid");
+                exit(EXIT_FAILURE);
+            }
+           if (WIFEXITED(status)) {
+                printf("exited, status=%d\n", WEXITSTATUS(status));
+            } else if (WIFSIGNALED(status)) {
+                printf("killed by signal %d\n", WTERMSIG(status));
+            } else if (WIFSTOPPED(status)) {
+                printf("stopped by signal %d\n", WSTOPSIG(status));
+            } else if (WIFCONTINUED(status)) {
+                printf("continued\n");
+            }
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        exit(EXIT_SUCCESS);
+    }
+
+-------------------------------
+Wait4() function:
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+int
+main(int argc, char *argv[])
+{
+    pid_t cpid, w;
+    int status;
+    struct rusage Use;
+
+   cpid = fork();
+    if (cpid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+
+   if (cpid == 0) {            /* Code executed by child */
+        printf("Child PID is %ld\n", (long) getpid());
+        if (argc == 1)
+            pause();                    /* Wait for signals */
+        _exit(atoi(argv[1]));
+
+   } else {                    /* Code executed by parent */
+        do {
+            w = wait4(cpid, &status, WUNTRACED | WCONTINUED, &Use);
+            if (w == -1) {
+                perror("waitpid");
+                exit(EXIT_FAILURE);
+            }
+
+           if (WIFEXITED(status)) {
+                printf("exited, status=%d\n", WEXITSTATUS(status));
+            } else if (WIFSIGNALED(status)) {
+                printf("killed by signal %d\n", WTERMSIG(status));
+            } else if (WIFSTOPPED(status)) {
+                printf("stopped by signal %d\n", WSTOPSIG(status));
+            } else if (WIFCONTINUED(status)) {
+                printf("continued\n");
+            }
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        exit(EXIT_SUCCESS);
+    }
+}
+
+
+-----------------------------------------------------------------------
+
+demonstrate the user of setuid(), setgid() and sticky bit system calls
+1.	 Setuid()
+-------------------------------------------------------------------------
+to demonstrate the use of setuid(), setgid(), seteuid(), getgid(), geteuid(), getegid()
+
+#include<stdio.h>
+#include<unistd.h>
+
+int main()
+{
+	uid_t uid;
+	printf("Before setting the uid and gid\nreal user id: %d\nreal grp id: %d\neffective user id: %d\neffective grp id: %d\n",getuid(),getgid(),geteuid(),getegid());
+	setuid(1003);
+	setgid(1002);
+	printf("After setting the uid and gid\nreal user id: %d\nreal grp id: %d\neffective user id: %d\neffective grp id: %d\n",getuid(),getgid(),geteuid(),getegid());
+	return 0;
+}
+
+
+-------------------------------------------------------------------------
+use of setresuid(), setresgid(), setfsuid() and setfsgid()
+
+#include<stdio.h>
+#include<unistd.h>
+
+int main()
+{
+	uid_t uid;
+	printf("Before setting the uid and gid\nreal user id: %d\nreal grp id: %d\neffective user id: %d\neffective grp id: %d\n",getuid(),getgid(),geteuid(),getegid());
+	setresuid(1001,1001,1001);
+	setresgid(1002,1002,1002);
+	printf("After using resuid and resgid\nreal user id: %d\nreal grp id: %d\neffective user id: %d\neffective grp id: %d\n",getuid(),getgid(),geteuid(),getegid());
+	setfsuid(1001);
+	setfsgid(1002);
+
+	printf("After using fsuid and fsgid\nreal user id: %d\nreal grp id: %d\neffective user id: %d\neffective grp id: %d\n",getuid(),getgid(),geteuid(),getegid());
+	return 0;
+}
+
+
+--------------------------------------------------------------------------
+demonstrate paging
+
+#include<stdio.h>
+#define MAX 50
+int main()
+{
+int page[MAX],i,n,f,ps,off,pno;
+int choice=0;
+printf("\nEnter the no of  peges in memory: ");
+scanf("%d",&n);
+printf("\nEnter page size: ");
+scanf("%d",&ps);
+printf("\nEnter no of frames: ");
+scanf("%d",&f);
+for(i=0;i<n;i++)
+page[i]=-1;
+printf("\nEnter the page table\n");
+printf("(Enter frame no as -1 if that page is not present in any frame)\n\n");
+printf("\npageno\tframeno\n-------\t-------");
+for(i=0;i<n;i++)
+{
+printf("\n\n%d\t\t",i);
+scanf("%d",&page[i]);
+}
+do
+{
+printf("\n\nEnter the logical address(i.e,page no & offset):");
+scanf("%d%d",&pno,&off);
+if(page[pno]==-1)
+printf("\n\nThe required page is not available in any of frames");
+else
+printf("\n\nPhysical address(i.e,frame no & offset):%d,%d",page[pno],off);
+printf("\nDo you want to continue(1/0)?:");
+scanf("%d",&choice);
+}while(choice==1);
+return 1;
+}
+
+
+--------------------------------------------------------------------------
+demonstrate segmentation
+
+#include<stdio.h>
+int main()
+{
+int a[10][10],b[100],i,j,n,x,base,size,seg,off;
+printf("Enter the segments count\n");
+scanf("%d",&n);
+for(i=0;i<n;i++)
+{
+printf("Enter the %d size \n",i+1);
+scanf("%d",&size);
+a[i][0]=size;
+printf("Enter the base address\n");
+scanf("%d",&base);
+a[i][1]=base;
+
+for(j=0;j<size;j++)
+        {
+        x=0;
+        scanf("%d",&x);
+//      b[base]=x;
+        base++;
+        b[base]=x;
+        }
+}
+printf("Enter the segment number and offset value \n");
+scanf("%d%d",&seg,&off);
+if(off<a[seg][0])
+{
+int abs=a[seg][1]+off;
+printf("the offset is less tha %d",a[seg][0]);
+printf("\n %d + %d = %d\n",a[seg][1],off,abs);
+printf("the element %d is at %d ",b[abs+1],abs);
+}
+else
+{
+printf("Error in locating\n");
+}
+}
+
+
+---------------------------------------------------------------------
+to demonstrate Banker’s algorithm 
+
+#include <stdio.h>
+int main()
+{
+int Max[10][10], need[10][10], alloc[10][10], avail[10], completed[10], safeSequence[10];
+int p, r, i, j, process, count;
+count = 0;
+printf("Enter the no of processes : ");
+scanf("%d", &p);
+for(i = 0; i< p; i++)
+    completed[i] = 0;
+printf("\n\nEnter the no of resources : ");
+scanf("%d", &r);
+printf("\n\nEnter the Max Matrix for each process : ");
+for(i = 0; i < p; i++)
+{
+    printf("\nFor process %d : ", i + 1);
+    for(j = 0; j < r; j++)
+        scanf("%d", &Max[i][j]);
+}
+printf("\n\nEnter the allocation for each process : ");
+for(i = 0; i < p; i++)
+{
+    printf("\nFor process %d : ",i + 1);
+    for(j = 0; j < r; j++)
+        scanf("%d", &alloc[i][j]);  
+}
+printf("\n\nEnter the Available Resources : ");
+for(i = 0; i < r; i++)
+        scanf("%d", &avail[i]); 
+    for(i = 0; i < p; i++)
+        for(j = 0; j < r; j++)
+            need[i][j] = Max[i][j] - alloc[i][j];  
+do
+{
+    printf("\n Max matrix:\tAllocation matrix:\n");
+    for(i = 0; i < p; i++)
+    {
+        for( j = 0; j < r; j++)
+            printf("%d  ", Max[i][j]);
+        printf("\t\t");
+        for( j = 0; j < r; j++)
+            printf("%d  ", alloc[i][j]);
+        printf("\n");
+    }
+    process = -1;
+    for(i = 0; i < p; i++)
+    {
+        if(completed[i] == 0)//if not completed
+        {
+            process = i ;
+            for(j = 0; j < r; j++)
+            {
+                if(avail[j] < need[i][j])
+                {
+                    process = -1;
+                    break;
+                }
+            }
+        }
+        if(process != -1)
+            break;
+    }
+    if(process != -1)
+    {
+        printf("\nProcess %d runs to completion!", process + 1);
+        safeSequence[count] = process + 1;
+        count++;
+        for(j = 0; j < r; j++)
+        {
+            avail[j] += alloc[process][j];
+            alloc[process][j] = 0;
+            Max[process][j] = 0;
+            completed[process] = 1;
+        }
+    }
+}while(count != p && process != -1);
+if(count == p)
+{
+    printf("\nThe system is in a safe state!!\n");
+    printf("Safe Sequence : < ");
+    for( i = 0; i < p; i++)
+            printf("%d  ", safeSequence[i]);
+    printf(">\n");
+}
+else
+    printf("\nThe system is in an unsafe state!!");
+}
+
+
+---------------------------------------------------------------------------
+demonstrate the Linked File allocation techniques
+
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+int main()
+{
+int f[50], p,i, st, len, j, c, k, a;
+//clrscr();
+for(i=0;i<50;i++)
+f[i]=0;
+printf("Enter how many blocks already allocated: ");
+scanf("%d",&p);
+printf("Enter blocks already allocated: ");
+for(i=0;i<p;i++)
+{
+scanf("%d",&a);
+f[a]=1;	
+}
+x: printf("Enter index starting block and length: ");
+scanf("%d%d", &st,&len);
+k=len;
+if(f[st]==0)
+{
+for(j=st;j<(st+k);j++)
+{
+if(f[j]==0)
+{
+f[j]=1;
+printf("%d-------->%d\n",j,f[j]);
+}
+else
+{
+printf("%d Block is already allocated \n",j);
+k++;
+}
+}
+}
+else
+printf("%d starting block is already allocated \n",st);
+printf("Do you want to enter more file(Yes - 1/No - 0)");
+scanf("%d", &c);
+if(c==1)
+goto x;
+else
+exit(0);
+return 0;
+}
+
+
+------------------------------------------------------------------------------
+
+demonstrate Indexed file allocation techniques
+
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+int main()
+{
+int f[50], index[50],i, n, st, len, j, c, k, ind,count=0;
+//clrscr();
+for(i=0;i<50;i++)
+f[i]=0;
+x:printf("Enter the index block: ");
+scanf("%d",&ind);
+if(f[ind]!=1)
+{
+printf("Enter no of blocks needed and no of files for the index %d on the disk : \n", ind);
+scanf("%d",&n);
+}
+else
+{
+printf("%d index is already allocated \n",ind);
+goto x;
+}
+y: count=0;
+for(i=0;i<n;i++)
+{
+scanf("%d", &index[i]);
+if(f[index[i]]==0)
+count++;
+}
+if(count==n)
+{
+for(j=0;j<n;j++)
+f[index[j]]=1;
+printf("Allocated\n");
+printf("File Indexed\n");
+for(k=0;k<n;k++)
+printf("%d-------->%d : %d\n",ind,index[k],f[index[k]]);
+}
+else
+{
+printf("File in the index is already allocated \n");
+printf("Enter another file indexed");
+goto y;
+}
+printf("Do you want to enter more file(Yes - 1/No - 0)");
+scanf("%d", &c);
+if(c==1)
+goto x;
+else
+exit(0);
+return 0;
+} 
+
+
+---------------------------------------------------------------------
+demonstrate the contiguous file allocation techniques
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+int main()
+{
+int f[50], i, st, len, j, c, k, count = 0;
+//clrscr();
+for(i=0;i<50;i++)
+f[i]=0;
+printf("Files Allocated are : \n");
+x: count=0;
+printf("Enter starting block and length of files: ");
+scanf("%d%d", &st,&len);
+for(k=st;k<(st+len);k++)
+if(f[k]==0)
+count++;
+if(len==count)
+{
+for(j=st;j<(st+len);j++)
+if(f[j]==0)
+{
+f[j]=1;
+printf("%d\t%d\n",j,f[j]);
+}
+if(j!=(st+len-1))
+printf(" The file is allocated to disk\n");
+}
+else
+printf(" The file is not allocated \n");
+printf("Do you want to enter more file(Yes - 1/No - 0)");
+scanf("%d", &c);
+if(c==1)
+goto x;
+else
+exit(0);
+return 0;
+}
+
+-----------------------------------------------------------------------------
+demonstrate the use of signal - IPC
+
+#include<stdio.h>
+#include<signal.h>
+// Handler for SIGINT, caused by
+// Ctrl-C at keyboard
+void handle_sigint(int sig)    // Signal Handler                         
+{
+    printf("Caught signal %d\n", sig);
+}
+int main()
+{
+    signal(SIGINT, handle_sigint); // Registering a Signal 
+    while (1)
+    {
+        printf(“hello world\n”);
+        sleep(1);
+    }
+    return 0;
+}
+
+
+---------------------------------------------------------------------------
+demonstrate the SIGCHLD and SIGINT handling
+
+SIGINT handling: 
+#include<stdio.h>
+#include<signal.h>
+// Handler for SIGINT, caused by
+// Ctrl-C at keyboard
+void handle_sigint(int sig)    // Signal Handler                         
+{
+    printf("Caught signal %d\n", sig);
+}
+int main()
+{
+    signal(SIGINT, handle_sigint); // Registering a Signal 
+    while (1)
+    {
+        printf(“hello world\n”);
+        sleep(1);
+    }
+    return 0;
+}
+SIGCHLD handling:
+#include<stdio.h>
+#include<signal.h>
+#include<unistd.h>
+// Handler for SIGINT, caused by
+// Ctrl-C at keyboard
+void handle_sigchild(int sig)    // Signal Handler                         
+{
+    printf("Inside child signal %d \n", sig);
+    //signal(SIGINT,SIG_DFL); //De registering Signal 
+}
+int main()
+{
+	signal(SIGCHLD, handle_sigchild); // Registering a Signal 
+	int p=fork();
+	if(p==0)
+	{
+	  printf("Inside Child process \n");
+	  //
+	  printf("End of child Process \n");
+	  }
+	  else if(p>=0)
+	  {
+	    printf("Inside parent process \n");
+	    wait();
+	    printf("End of parent process \n");
+	   } 
+	return 0;
+}
+
+
+------------------------------------------------------------------------------
+demonstrate the use of shared memory
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/shm.h>
+#include<string.h>
+int main()
+{
+int i;
+void *shared_memory;
+char buff[100];
+int shmid;
+shmid=shmget((key_t)2345, 1024, 0666|IPC_CREAT); 
+
+/*creates shared memory segment with key 2345, having size 1024 bytes. IPC_CREAT is used to create the shared segment if it does not exist. 0666 are the permisions on the shared segment*/
+
+printf("Key of shared memory is %d\n",shmid);
+shared_memory=shmat(shmid,NULL,0); //process attached to shared memory segment
+printf("Process attached at %p\n",shared_memory); //this prints the address where the segment is attached with this process
+printf("Enter some data to write to shared memory\n");
+read(0,buff,100); //get some input from user
+strcpy(shared_memory,buff); //data written to shared memory
+printf("You wrote : %s\n",(char *)shared_memory);
+}
+
+-----------------------------------------------------------------------------------
+demonstrate the use of semaphore - IPC
+
+#include<pthread.h>
+#include<stdio.h>
+#include<semaphore.h>
+#include<unistd.h> 
+void *fun1();
+ void *fun2();
+ int shared=1; //shared variable
+ sem_t s; //semaphore variable
+ int main()
+ {
+ sem_init(&s,0,1); //initialize semaphore variable - 1st argument is address of variable, 2nd is number of processes sharing semaphore, 3rd argument is the initial value of semaphore variable
+ pthread_t thread1, thread2;
+ pthread_create(&thread1, NULL, fun1, NULL);
+ pthread_create(&thread2, NULL, fun2, NULL);
+ pthread_join(thread1, NULL);
+ pthread_join(thread2,NULL);
+ printf("Final value of shared is %d\n",shared); //prints the last updated value of shared variable
+ }
+void *fun1()
+{
+    int x;
+    sem_wait(&s); //executes wait operation on s
+    x=shared;//thread1 reads value of shared variable
+    printf("Thread1 reads the value as %d\n",x);
+    x++;  //thread1 increments its value
+    printf("Local updation by Thread1: %d\n",x);
+    sleep(1); //thread1 is preempted by thread 2
+    shared=x; //thread one updates the value of shared variable
+    printf("Value of shared variable updated by Thread1 is: %d\n",shared);    
+    sem_post(&s);
+}
+void *fun2()
+{
+    int y;
+    sem_wait(&s);
+    y=shared;//thread2 reads value of shared variable
+    printf("Thread2 reads the value as %d\n",y);
+    y--;  //thread2 increments its value
+    printf("Local updation by Thread2: %d\n",y);
+    sleep(1); //thread2 is preempted by thread 1
+    shared=y; //thread2 updates the value of shared variable
+    printf("Value of shared variable updated by Thread2 is: %d\n",shared);
+    sem_post(&s);
+}
+
+
+------------------------------------------------------------------------------------
+demonstrate the use of mutex - IPC
+
+#include<pthread.h>
+#include<stdio.h>
+#include<unistd.h>
+void *fun1();
+void *fun2();
+int shared=1; //shared variable
+int main()
+ {
+ pthread_t thread1, thread2;
+ pthread_create(&thread1, NULL, fun1, NULL);
+ pthread_create(&thread2, NULL, fun2, NULL);
+ pthread_join(thread1, NULL);
+ pthread_join(thread2,NULL);
+ printf("Final value of shared is %d\n",shared); //prints the last updated value of shared variable
+ }
+void *fun1()
+{
+    int x;
+    x=shared;//thread one reads value of shared variable
+    printf("Thread1 reads the value of shared variable as %d\n",x);
+    x++;  //thread one increments its value
+    printf("Local updation by Thread1: %d\n",x);
+    sleep(1);  //thread one is preempted by thread 2
+    shared=x; //thread one updates the value of shared variable
+    printf("Value of shared variable updated by Thread1 is: %d\n",shared);
+}
+void *fun2()
+ {
+     int y;
+     y=shared;//thread two reads value of shared variable
+     printf("Thread2 reads the value as %d\n",y);
+     y--;  //thread two increments its value
+     printf("Local updation by Thread2: %d\n",y);
+     sleep(1); //thread two is preempted by thread 1
+     shared=y; //thread one updates the value of shared variable
+     printf("Value of shared variable updated by Thread2 is: %d\n",shared);
+ }
+
+-----------------------------------------------------------------
+demonstrate the use of message queue - IPC
+
+
+#include<stdlib.h>
+ #include<stdio.h>
+ #include<string.h>
+ #include<unistd.h>
+ #include<sys/types.h>
+ #include<sys/ipc.h>
+ #include<sys/msg.h>
+ #define MAX_TEXT 512   //maximum length of the message that can be sent allowed
+ struct my_msg{
+    long int msg_type;
+    char some_text[MAX_TEXT];
+ };
+ int main()
+ {
+    int running=1;
+    int msgid;
+    struct my_msg some_data;
+    char buffer[50]; //array to store user input
+    msgid=msgget((key_t)14534,0666|IPC_CREAT);
+    if (msgid == -1) // -1 means the message queue is not created
+    {
+        printf("Error in creating queue\n");
+        exit(0);
+    }
+
+    while(running)
+    {
+        printf("Enter some text:\n");
+        fgets(buffer,50,stdin);
+        some_data.msg_type=1;
+        strcpy(some_data.some_text,buffer);
+        if(msgsnd(msgid,(void *)&some_data, MAX_TEXT,0)==-1) // msgsnd returns -1 if the message is not sent
+        {
+            printf("Msg not sent\n");
+        }
+        if(strncmp(buffer,"end",3)==0)
+        {
+            running=0;
+        }
+    }
+ }
+
+
+--------------------------------------------------------------------------------------
+demonstrate the use of socket - IPC
+
+SOCKET:
+#include <stdio.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#define MAX 80
+#define PORT 8080
+#define SA struct sockaddr
+
+// Function designed for chat between client and server.
+void func(int connfd)
+{
+    char buff[MAX];
+    int n;
+    // infinite loop for chat
+    for (;;) {
+        bzero(buff, MAX);
+
+        // read the message from client and copy it in buffer
+        read(connfd, buff, sizeof(buff));
+        // print buffer which contains the client contents
+        printf("From client: %s\t To client : ", buff);
+        bzero(buff, MAX);
+        n = 0;
+        // copy server message in the buffer
+        while ((buff[n++] = getchar()) != '\n')
+            ;
+
+        // and send that buffer to client
+        write(connfd, buff, sizeof(buff));
+
+        // if msg contains "Exit" then server exit and chat ended.
+        if (strncmp("exit", buff, 4) == 0) {
+            printf("Server Exit...\n");
+            break;
+        }
+    }
+}
+
+// Driver function
+int main()
+{
+    int sockfd, connfd, len;
+    struct sockaddr_in servaddr, cli;
+
+    // socket create and verification
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        printf("socket creation failed...\n");
+        exit(0);
+    }
+    else
+        printf("Socket successfully created..\n");
+    bzero(&servaddr, sizeof(servaddr));
+
+    // assign IP, PORT
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = htons(PORT);
+
+    // Binding newly created socket to given IP and verification
+    if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
+        printf("socket bind failed...\n");
+        exit(0);
+    }
+    else
+        printf("Socket successfully binded..\n");
+
+    // Now server is ready to listen and verification
+    if ((listen(sockfd, 5)) != 0) {
+        printf("Listen failed...\n");
+        exit(0);
+    }
+    else
+        printf("Server listening..\n");
+    len = sizeof(cli);
+
+    // Accept the data packet from client and verification
+    connfd = accept(sockfd, (SA*)&cli, &len);
+    if (connfd < 0) {
+        printf("server accept failed...\n");
+        exit(0);
+    }
+    else
+        printf("server accept the client...\n");
+
+    // Function for chatting between client and server
+    func(connfd);
+
+    // After chatting close the socket
+    close(sockfd);
+}
+CLIENT:
+#include <arpa/inet.h> // inet_addr()
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h> // bzero()
+#include <sys/socket.h>
+#include <unistd.h> // read(), write(), close()
+#define MAX 80
+#define PORT 8080
+#define SA struct sockaddr
+void func(int sockfd)
+{
+    char buff[MAX];
+    int n;
+    for (;;) {
+        bzero(buff, sizeof(buff));
+        printf("Enter the string : ");
+        n = 0;
+        while ((buff[n++] = getchar()) != '\n')
+            ;
+        write(sockfd, buff, sizeof(buff));
+        bzero(buff, sizeof(buff));
+        read(sockfd, buff, sizeof(buff));
+        printf("From Server : %s", buff);
+        if ((strncmp(buff, "exit", 4)) == 0) {
+            printf("Client Exit...\n");
+            break;
+        }
+    }
+}
+
+int main()
+{
+    int sockfd, connfd;
+    struct sockaddr_in servaddr, cli;
+
+    // socket create and verification
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        printf("socket creation failed...\n");
+        exit(0);
+    }
+    else
+        printf("Socket successfully created..\n");
+    bzero(&servaddr, sizeof(servaddr));
+
+    // assign IP, PORT
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servaddr.sin_port = htons(PORT);
+
+    // connect the client socket to server socket
+    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr))
+        != 0) {
+        printf("connection with the server failed...\n");
+        exit(0);
+    }
+    else
+        printf("connected to the server..\n");
+
+    // function for chat
+    func(sockfd);
+
+    // close the socket
+    close(sockfd);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
