@@ -1,0 +1,223 @@
+
+
+
+# NAIVE BAYES ----------------------------------------------------------------------------------------------------------------------
+# importing the required modules
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score,confusion_matrix
+from sklearn.preprocessing import LabelEncoder
+
+df=pd.read_csv("/content/drug200.csv")
+print(df.head(3))
+print(df.columns)
+
+# converting catergorical data to numerical
+
+label_encoder = LabelEncoder()
+
+for col in df.columns:
+  df[col]=label_encoder.fit_transform(df[col])
+
+print(df.head(3))
+
+# splitting target and data
+
+X_data = df.iloc[:,:-1].values
+Y_data = df.iloc[:,-1].values
+
+print(X_data)
+print(Y_data)
+
+# splitting to train and test
+
+x_train,x_test,y_train,y_test = train_test_split(X_data,Y_data,test_size=0.3,random_state=42)
+
+# fitting into the model
+
+gauss_nb_model = GaussianNB()
+gauss_nb_model.fit(x_train,y_train)
+
+
+# predictions
+y_predictions = gauss_nb_model.predict(x_test)
+
+for i in range(y_predictions.size):
+  print(y_predictions[i],y_test[i])
+
+# accuracy score
+accr = accuracy_score(y_test,y_predictions)
+print(f"ACCURACY : {accr*100}%")
+
+# confusion matrix
+cm=confusion_matrix(y_test,y_predictions)
+print("CONFUSION MATRIX :\n",cm)
+
+tp=cm[0][0]
+fp=cm[0][1]
+fn=cm[1][0]
+
+precision = tp/(tp+fp)
+recall = tp/(tp+fn)
+print(f"PRECISION : {precision*100}%")
+print(f"RECALL : {recall*100}%")
+
+# ENSEMBLING METHODS-----------------------------------------------------------------------------------------------------------------
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, VotingClassifier
+from sklearn.metrics import accuracy_score
+
+df=pd.read_csv("/content/drug200.csv")
+
+encoded_val=[]
+cols=['Sex','BP','Cholesterol','Drug']
+le = LabelEncoder()
+for col in cols:
+  df[col]=le.fit_transform(df[col])
+
+
+X=df.iloc[:,:-1].values
+y=df.iloc[:,-1].values
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+models = [
+    ["Decision Tree" , DecisionTreeClassifier(random_state=42)],
+    ["Random Forest" , RandomForestClassifier(random_state=42)],
+    ["Bagging" , BaggingClassifier(base_estimator=DecisionTreeClassifier(random_state=42), n_estimators=10, random_state=42)],
+    ["Boosting (AdaBoost)" ,AdaBoostClassifier(base_estimator=DecisionTreeClassifier(random_state=42), n_estimators=50, random_state=42)],
+    ["Voting" , VotingClassifier(estimators=[
+    ('dt', DecisionTreeClassifier(random_state=42)),
+    ('rf', RandomForestClassifier(random_state=42)),
+    ('bag', BaggingClassifier(base_estimator=DecisionTreeClassifier(random_state=42), n_estimators=10, random_state=42)),
+    ('boost', AdaBoostClassifier(base_estimator=DecisionTreeClassifier(random_state=42), n_estimators=50, random_state=42))
+    ], voting='hard')]
+]
+
+
+answer = []
+for model_name,model in models:
+  model.fit(X_train,y_train)
+  y_predictions = model.predict(X_test)
+  acc = accuracy_score(y_test,y_predictions)
+
+  answer.append([model_name,acc*100])
+
+
+print(answer)
+d = pd.DataFrame(answer,columns=["Model","Accuracy"])
+print(d)
+
+
+# SVm-----------------------------------------------------------------------------------------------------------------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score,confusion_matrix
+from sklearn.svm import SVC
+
+data = load_digits()
+
+X= data.data
+y= data.target
+
+x_train,x_test,y_train,y_test = train_test_split(X,y,test_size = 0.25 ,random_state=0)
+
+
+model = SVC(gamma=0.001,C=100)
+model.fit(x_train,y_train)
+y_pred = model.predict(x_test)
+
+#printing the predicted and the actual values
+print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+
+
+# printing the accuracy, precision and recall
+accr = accuracy_score(y_test,y_pred)
+cm = confusion_matrix(y_test,y_pred)
+
+tp,fp,fn = cm[0][0],cm[0][1],cm[1][0]
+
+prec = tp/(tp+fp)
+recall = tp/(tp+fn)
+
+print(f"ACCURACY : {accr*100}%")
+print(f"PRECISION : {prec*100}%")
+print(f"RECALL : {recall*100}%")
+
+
+
+fig1, axes1 = plt.subplots(8, 8, figsize=(12,12))
+for axis, images, prediction in zip(axes1.flat, x_test, y_pred):
+  images = images.reshape(8, 8)  # Reshape back to 8x8 for display
+  axis.imshow(images,cmap='binary')
+  axis.set(xticks=[],yticks=[])
+  axis.set_title(f'Prediction: {prediction}')
+
+
+
+
+# Gradient Descent------------------------------------------------------------------------------------------------------------------
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate some random data for demonstration
+np.random.seed(42)
+X = 2 * np.random.rand(100, 1)
+y = 4 + 3 * X + np.random.rand(100, 1)
+
+# Add a bias term to the input features
+X_b = np.c_[np.ones((100, 1)), X]
+
+# Convert NumPy arrays to TensorFlow tensors
+X_tensor = tf.constant(X_b, dtype=tf.float32)
+y_tensor = tf.constant(y, dtype=tf.float32)
+
+# Set random seed for reproducibility
+tf.random.set_seed(42)
+
+# Initialize random values for the model parameters
+theta = tf.Variable(tf.random.normal(shape=(2, 1)))
+
+# Define the linear regression model
+def linear_regression(X, theta):
+    return tf.matmul(X, theta)
+
+# Define the mean squared error (MSE) loss function
+def mean_squared_error(y_true, y_pred):
+    return tf.reduce_mean(tf.square(y_true - y_pred))
+
+# Define the learning rate and the number of iterations
+learning_rate = 0.01
+n_iterations = 1000
+
+# Implement the gradient descent algorithm
+for iteration in range(n_iterations):
+    with tf.GradientTape() as tape:
+        y_pred = linear_regression(X_tensor, theta)
+        loss = mean_squared_error(y_tensor, y_pred)
+
+    gradients = tape.gradient(loss, [theta])[0]
+    theta.assign(theta - learning_rate * gradients)
+
+# Print the optimized parameters
+print("Optimized theta:")
+print(theta.numpy())
+
+# Plot the original data and the linear regression line
+plt.scatter(X, y, label="Original data")
+plt.plot(X, theta[0] + theta[1] * X, color='red', label="Linear regression")
+plt.xlabel("X")
+plt.ylabel("y")
+plt.legend()
+plt.show()
