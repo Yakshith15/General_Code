@@ -1,0 +1,337 @@
+#prims Algorithm
+#Time Complexity: O(V^2)
+#Space Complexity: O(V^2)
+class Graph():
+	def __init__(self, vertices):
+		self.V = vertices
+		self.graph = [[0 for column in range(vertices)]
+					for row in range(vertices)]
+	def printMST(self, parent):
+		print("Edge \tWeight")
+		for i in range(1, self.V):
+			print(parent[i], "-", i, "\t", self.graph[i][parent[i]])
+	def minKey(self, key, mstSet):
+		min = 999999
+		for v in range(self.V):
+			if key[v] < min and mstSet[v] == False:
+				min = key[v]
+				min_index = v
+		return min_index
+	def primMST(self):
+		key = [999999] * self.V
+		parent = [None] * self.V 
+		key[0] = 0
+		mstSet = [False] * self.V
+		parent[0] = -1 
+		for cout in range(self.V):
+			u = self.minKey(key, mstSet)
+			mstSet[u] = True
+			for v in range(self.V):
+				if self.graph[u][v] > 0 and mstSet[v] == False \
+				and key[v] > self.graph[u][v]:
+					key[v] = self.graph[u][v]
+					parent[v] = u
+		self.printMST(parent)
+if __name__ == '__main__':
+	g = Graph(5)
+	g.graph = [[0, 2, 0, 6, 0],
+			[2, 0, 3, 8, 5],
+			[0, 3, 0, 0, 7],
+			[6, 8, 0, 0, 9],
+			[0, 5, 7, 9, 0]]
+
+	g.primMST()
+
+
+
+
+
+#BELLMAN FORD Algorithm
+#TC : V*E
+# SC : (v+E)
+import heapq
+class Graph:
+    def __init__(self, vertices):
+        self.vertices = vertices
+        self.graph = []
+    def add_edge(self, u, v, w):
+        self.graph.append([u, v, w])
+    def bellman_ford(self, source):
+        distances = [float('inf')] * self.vertices
+        predecessors = [-1] * self.vertices
+        distances[source] = 0
+        for _ in range(self.vertices - 1):
+            for u, v, w in self.graph:
+                if distances[u] != float('inf') and distances[u] + w < distances[v]:
+                    distances[v] = distances[u] + w
+                    predecessors[v] = u
+        for u, v, w in self.graph:
+            if distances[u] != float('inf') and distances[u] + w < distances[v]:
+                print("Graph contains negative cycle. Cannot find shortest paths.")
+                return
+        print("Shortest paths from source vertex:")
+        for i in range(self.vertices):
+            path = self.construct_path(predecessors, i)
+            print(f"To {i}: {' -> '.join(map(str, path))} (Distance: {distances[i]})")
+
+    def construct_path(self, predecessors, vertex):
+        path = []
+        while vertex != -1:
+            path.insert(0, vertex)
+            vertex = predecessors[vertex]
+        return path
+g = Graph(5)
+g.add_edge(0, 1, 6)
+g.add_edge(0, 2, 7)
+g.add_edge(1, 3, 5)
+g.add_edge(1, 4, -4)
+g.add_edge(1, 2, 8)
+g.add_edge(2, 4, 9)
+g.add_edge(2, 3, -3)
+g.add_edge(3, 4, 7)
+source_vertex = 0
+g.bellman_ford(source_vertex)
+
+
+
+# Kruskal's algorithm
+# TC :E*log(E)
+# SC :V+E
+class Graph: 
+	def __init__(self, vertices): 
+		self.V = vertices 
+		self.graph = [] 
+	def addEdge(self, u, v, w): 
+		self.graph.append([u, v, w]) 
+	def find(self, parent, i): 
+		if parent[i] != i:  
+			parent[i] = self.find(parent, parent[i]) 
+		return parent[i] 
+	def union(self, parent, rank, x, y): 
+		if rank[x] < rank[y]: 
+			parent[x] = y 
+		elif rank[x] > rank[y]: 
+			parent[y] = x 
+		else: 
+			parent[y] = x 
+			rank[x] += 1
+	def KruskalMST(self): 
+		result = [] 
+		i = 0 
+		e = 0
+		self.graph = sorted(self.graph, 
+							key=lambda item: item[2]) 
+
+		parent = [] 
+		rank = [] 
+		for node in range(self.V): 
+			parent.append(node) 
+			rank.append(0) 
+		while e < self.V - 1: 
+			u, v, w = self.graph[i] 
+			i = i + 1
+			x = self.find(parent, u) 
+			y = self.find(parent, v) 
+			if x != y: 
+				e = e + 1
+				result.append([u, v, w]) 
+				self.union(parent, rank, x, y) 
+		minimumCost = 0
+		print("Edges in the constructed MST") 
+		for u, v, weight in result: 
+			minimumCost += weight 
+			print("%d -- %d == %d" % (u, v, weight)) 
+		print("Minimum Spanning Tree", minimumCost) 
+
+if __name__ == '__main__': 
+	g = Graph(4) 
+	g.addEdge(0, 1, 10) 
+	g.addEdge(0, 2, 6) 
+	g.addEdge(0, 3, 5) 
+	g.addEdge(1, 3, 15) 
+	g.addEdge(2, 3, 4) 
+	g.KruskalMST()
+
+
+
+#Dijkstra's algorithm
+
+
+import heapq
+class Graph:
+    def __init__(self):
+        self.nodes = set()
+        self.edges = {}
+    def add_node(self, value):
+        self.nodes.add(value)
+        self.edges[value] = []
+    def add_edge(self, from_node, to_node, weight):
+        self.edges[from_node].append((to_node, weight))
+        self.edges[to_node].append((from_node, weight))
+
+def dijkstra(graph, start):
+    priority_queue = [(0, start)]
+    distances = {node: float('infinity') for node in graph.nodes}
+    distances[start] = 0
+    predecessors = {node: None for node in graph.nodes}
+    while priority_queue:
+        current_distance, current_node = heapq.heappop(priority_queue)
+        if current_distance > distances[current_node]:
+            continue
+        for neighbor, weight in graph.edges[current_node]:
+            distance = current_distance + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                predecessors[neighbor] = current_node
+                heapq.heappush(priority_queue, (distance, neighbor))
+    paths = {node: build_path(predecessors, node) for node in graph.nodes}
+    return distances, paths
+
+def build_path(predecessors, node):
+    path = []
+    while node is not None:
+        path.insert(0, node)
+        node = predecessors[node]
+    return path
+g = Graph()
+g.add_node("A")
+g.add_node("B")
+g.add_node("C")
+g.add_node("D")
+g.add_edge("A", "B", 1)
+g.add_edge("A", "C", 4)
+g.add_edge("B", "C", 2)
+g.add_edge("B", "D", 5)
+g.add_edge("C", "D", 1)
+start_node = "A"
+distances, paths = dijkstra(g, start_node)
+print(f"Shortest distances from node {start_node}:")
+for node, distance in distances.items():
+    print(f"To node {node}: {distance}")
+print("\nShortest paths from node A:")
+for node, path in paths.items():
+    print(f"To node {node}: {' -> '.join(map(str, path))}")
+
+
+#All-Pairs Shortest Paths
+
+INF = float('inf')
+def allpair(graph):
+    n = len(graph)
+    dist = [[graph[i][j] for j in range(n)] for i in range(n)]
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    
+    return dist
+graph = [
+    [0, 5, INF, 10],
+    [INF, 0, 3, INF],
+    [INF, INF, 0, 1],
+    [INF, INF, INF, 0]
+]
+result = allpair(graph)
+print("All-Pairs Shortest Paths:")
+for row in result:
+    print(row)
+
+
+#TSP using BB
+
+import numpy as np
+class TSPBranchBound:
+    def __init__(self, graph):
+        self.graph = graph
+        self.n = len(graph)
+        self.visited = [False] * self.n
+        self.min_cost = float('inf')
+        self.best_path = []
+    def solve(self):
+        self.visited[0] = True  # Start from vertex 0
+        self.branch_and_bound(0, [0], 0)
+    def branch_and_bound(self, current_vertex, path, cost):
+        if len(path) == self.n:
+            if self.graph[current_vertex][0] + cost < self.min_cost:
+                self.min_cost = self.graph[current_vertex][0] + cost
+                self.best_path = path + [0]
+            return
+
+        for next_vertex in range(self.n):
+            if not self.visited[next_vertex]:
+                if cost + self.graph[current_vertex][next_vertex] < self.min_cost:
+                    self.visited[next_vertex] = True
+                    self.branch_and_bound(next_vertex, path + [next_vertex], cost + self.graph[current_vertex][next_vertex])
+                    self.visited[next_vertex] = False
+    def get_min_cost(self):
+        return self.min_cost
+    def get_best_path(self):
+        return self.best_path
+graph = np.array([[0, 10, 15, 20],
+                  [10, 0, 35, 25],
+                  [15, 35, 0, 30],
+                  [20, 25, 30, 0]])
+
+tsp_solver = TSPBranchBound(graph)
+tsp_solver.solve()
+min_cost = tsp_solver.get_min_cost()
+best_path = tsp_solver.get_best_path()
+print("Minimum Cost:", min_cost)
+print("Best Path:", best_path)
+
+
+#0/1 knapsack using branch and bound
+
+class KnapsackNode:
+    def __init__(self, level, value, weight, include):
+        self.level = level
+        self.value = value
+        self.weight = weight
+        self.include = include
+
+def knapsack_branch_and_bound(weights, values, capacity):
+    n = len(weights)
+    value_per_weight = [(i, values[i] / weights[i]) for i in range(n)]
+    value_per_weight.sort(key=lambda x: x[1], reverse=True)
+    max_value = 0
+    best_taken = None
+    def bound(node):
+        if node.weight > capacity:
+            return 0
+        bound_value = node.value
+        bound_weight = node.weight
+        j = node.level + 1
+        while j < n and bound_weight + weights[value_per_weight[j][0]] <= capacity:
+            bound_value += values[value_per_weight[j][0]]
+            bound_weight += weights[value_per_weight[j][0]]
+            j += 1
+        if j < n:
+            bound_value += (capacity - bound_weight) * value_per_weight[j][1]
+        return bound_value
+
+    def knapsack_recursive(node):
+        nonlocal max_value, best_taken
+        if node.level == n - 1:
+            if node.value > max_value:
+                max_value = node.value
+                best_taken = node.include.copy()
+        else:
+            include_node = KnapsackNode(node.level + 1,
+                                        node.value + values[value_per_weight[node.level + 1][0]],
+                                        node.weight + weights[value_per_weight[node.level + 1][0]],
+                                        node.include + [value_per_weight[node.level + 1][0]])
+            exclude_node = KnapsackNode(node.level + 1, node.value, node.weight, node.include.copy())
+            if bound(include_node) > max_value:
+                knapsack_recursive(include_node)
+            if bound(exclude_node) > max_value:
+                knapsack_recursive(exclude_node)
+    initial_node = KnapsackNode(-1, 0, 0, [])
+    knapsack_recursive(initial_node)
+    return max_value, best_taken
+weights = [2, 3, 5, 7, 1, 4, 1]
+values = [10, 5, 15, 7, 6, 18, 3]
+capacity = 15
+max_value, best_taken = knapsack_branch_and_bound(weights, values, capacity)
+print("Maximum Value:", max_value)
+print("Items Taken:", best_taken)
