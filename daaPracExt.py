@@ -313,8 +313,8 @@
 #     while e<V-1:
 #         u,v,w=edges[i]
 #         i+=1
-#         x=parent[u]
-#         y=parent[v]
+#         x=find(parent,u)
+#         y=find(parent,v)
 #         if x!=y:
 #             e+=1
 #             result.append([u,v,w])
